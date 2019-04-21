@@ -95,14 +95,14 @@ function shading(ray, isect) {
 // ===YOUR CODE STARTS HERE===
 	//ambient light should be intensity times reflectance; but since intensity so low its kinda equiv
 	a_clone = ambientLight.clone()
-	color = color.add(a_clone.multiply(isect.material.ka))
+	color.add(a_clone.multiply(isect.material.ka))
 
 	for(let i=0; i<lights.length; i++){
 		let ls = lights[i].getLight(isect.position)
 		let shadowRay = new Ray(isect.position, ls.direction);
 		let distToLight = ls.position.clone().sub(isect.position).length()
 		let shadow_isect = rayIntersectScene(shadowRay)
-		if (shadow_isect && shadow_isect.t < distToLight){ // if there is a shadow intersection 
+		if (shadow_isect && ls.position.clone().sub(shadow_isect.position).length() < distToLight){ // if there is a shadow intersection 
 			//and the intersection length is shorter that the distance to the light. If the interesection length
 			// were further than the distance to the light, that means intersected something behidn the light
 			continue; // skip this iteration; we're done this loop iteration no need to do shading since shadowed
@@ -117,14 +117,14 @@ function shading(ray, isect) {
 				let intensity_clone = ls.intensity.clone()
 				let diffuse = intensity_clone.multiply(isect.material.kd)
 				diffuse.multiplyScalar(Math.max(n.clone().dot(l), 0))
-				color = color.add(diffuse)
+				color.add(diffuse)
 			}
 
 			if(isect.material.ks != null && isect.material.p != null){
 				let specular = ls.intensity.clone()
 				specular.multiply(isect.material.ks)
 				specular.multiplyScalar(Math.pow(Math.max(r.clone().dot(v), 0), isect.material.p))
-				color = color.add(specular)
+				color.add(specular)
 			}
 		}
 	}	

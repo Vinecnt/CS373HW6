@@ -66,7 +66,7 @@ class Sphere {
 		let B = (ray_o_clone.sub(this.C).multiplyScalar(2).dot(ray.d)) // B = 2*(O - C) . d
 		ray_o_clone = ray.o.clone()
 		let C = (ray_o_clone.sub(this.C).lengthSq()) - this.r2 // |O-C|^2 - r^2
-		let discriminant = B**2 - 4*A*C
+		let discriminant = (B*B) - (4*A*C)
 		let t = null;
 		if (discriminant < 0){
 			return null
@@ -80,20 +80,19 @@ class Sphere {
 			}
 		}
 		else if (discriminant > 0){ // two isects, pick smallest pos
-			let t1 = (-1*B + discriminant) / (2*A)
-			let t2 = (-1*B - discriminant) / (2*A)
-			let arr = []
+			let t1 = (-1*B + Math.sqrt(discriminant) ) / (2*A)
+			let t2 = (-1*B - Math.sqrt(discriminant) ) / (2*A)
 			if ( t1 >0 && t2 <0){ // if t1 is pos set t it t1
 				t = t1
 			}
-			else if (t1<0 && t2 >0){ // if t2 is pos set t it t2
+			else if (t1 <0 && t2 >0){ // if t2 is pos set t it t2
 				t = t2
 			}
 			else if (t1>0 && t2>0){ // if both pos, take the min. however if the min fails, take the max
 				t = Math.min(t1,t2)
-				if(t<tmin || t>tmax){
-					t = Math.max(t1,t2)
-				}
+				// if(t<tmin || t>tmax){
+				// 	t = Math.max(t1,t2)
+				// }
 			}
 			else{ // must mean both neg
 				return null
@@ -102,7 +101,7 @@ class Sphere {
 
 		if(t<tmin || t>tmax) return null
 
-		let isect = new Intersection();   // create intersection structure
+		let isect = new Intersection()	;   // create intersection structure
 		isect.t = t;
 		isect.position = ray.pointAt(t);
 		isect.normal = isect.position.clone().sub(this.C).normalize();
