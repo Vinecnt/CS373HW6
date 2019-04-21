@@ -59,9 +59,32 @@ function render() {
 /* Trace ray in the scene and return color of ray. 'depth' is the current recursion depth.
  * If intersection material has non-null kr or kt, perform recursive ray tracing. */
 function raytracing(ray, depth) {
+	//compared to the code in class
+	// this fn calls a fn that gives you back all the intersections of shapes in the scene
+	// then you also compute the shading and give back the color
 	let color = new THREE.Color(0,0,0);
 // ===YOUR CODE STARTS HERE===
-
+	let isect = rayIntersectScene(ray) //returns the intersection structure
+	if (isect != null){ 
+		// if there's reflectance and not max depth, recurse; sum of its transparency and reflectance
+		if ( (isect.material.kr != null || isect.material.kt != null) && (depth < maxDepth)){
+			color_1_clone = color.clone()
+			reflect_ray = ray.clone().reflect(isect.normal)
+			reflected_color = raytracing(reflect_ray, depth+1)
+			if(isect.material.kr != null){
+				color = color.add( reflected_color.clone().multiply(isect.material.kr) )
+			}
+			if(isect.material.kt != null){
+				color = color.add( reflected_color.clone().multiply(isect.material.kt))
+			}
+		}
+		else{
+			color = shading(ray, isect)
+		}
+	}
+	else{
+		color = backgroundColor // if no intersection
+		}
 // ---YOUR CODE ENDS HERE---
 	return color;
 }
@@ -70,7 +93,41 @@ function raytracing(ray, depth) {
 function shading(ray, isect) {
 	let color = new THREE.Color(0,0,0);
 // ===YOUR CODE STARTS HERE===
+	//ambient light should be intensity times reflectance; but since intensity so low its kinda equiv
+	a_clone = ambientLight.clone()
+	color = color.add(a_clone.multiply(isect.material.ka))
 
+	for(let i=0; i<lights.length; i++){
+		let ls = lights[i].getLight(isect.position)
+		let shadowRay = new Ray(isect.position, ls.direction);
+		let distToLight = ls.position.clone().sub(isect.position).length()
+		let shadow_isect = rayIntersectScene(shadowRay)
+		if (shadow_isect && shadow_isect.t < distToLight){ // if there is a shadow intersection 
+			//and the intersection length is shorter that the distance to the light. If the interesection length
+			// were further than the distance to the light, that means intersected something behidn the light
+			continue; // skip this iteration; we're done this loop iteration no need to do shading since shadowed
+		}
+		else{
+			let l = ls.direction
+			let n = isect.normal 
+			let v = (ray.d).multiplyScalar(-1)
+			let r = reflect(l,n)
+			//diffuse
+			if(isect.material.kd != null){
+				let intensity_clone = ls.intensity.clone()
+				let diffuse = intensity_clone.multiply(isect.material.kd)
+				diffuse.multiplyScalar(Math.max(n.clone().dot(l), 0))
+				color = color.add(diffuse)
+			}
+
+			if(isect.material.ks != null && isect.material.p != null){
+				let specular = ls.intensity.clone()
+				specular.multiply(isect.material.ks)
+				specular.multiplyScalar(Math.pow(Math.max(r.clone().dot(v), 0), isect.material.p))
+				color = color.add(specular)
+			}
+		}
+	}	
 // ---YOUR CODE ENDS HERE---
 	return color;
 }
