@@ -44,7 +44,7 @@ class SpotLight {
 		this.to = to.clone();
 		this.intensity = intensity.clone();
 		this.exponent = exponent;
-		this.cutoff = cutoff;
+		this.cutoff = cutoff/2;
 	}
 	getLight(shadingPoint) {
 // ===YOUR CODE STARTS HERE===
@@ -54,18 +54,26 @@ class SpotLight {
 		ls.position = this.from.clone();
 		ls.direction = ls.position.clone();
 		ls.direction.sub(shadingPoint);
-		ls.direction.normalize();
+
 
 		// target - originate  ; results in a ray pointing from originate to target
-		let spotlight_vector = this.to.clone().sub(this.from)
-		let shadingPoint_vector = shadingPoint.clone().sub(this.from)
-		let between_angle = spotlight_vector.angleTo(shadingPoint_vector)
-		if (between_angle > (this.cutoff * Math.PI / 180)){ // if in the cutoff
+		// let spotlight_vector = this.to.clone().sub(ls.position).normalize()
+		// let shadingPoint_vector = shadingPoint.clone().sub(ls.position).normalize()
+		let spotlight_vector = ls.position.clone().sub(this.to).normalize()
+		let shadingPoint_vector = ls.position.clone().sub(shadingPoint).normalize()
+		
+		let cos_between_angle = spotlight_vector.dot(shadingPoint_vector) // cos(angle between them) =  spot light . shading vector
+		let cos_cutoff = Math.cos(this.cutoff * Math.PI / 180);
+		if (cos_between_angle >=  cos_cutoff ){ // if in the cutoff
 			ls.intensity = this.intensity.clone();
-			ls.intensity.multiplyScalar(Math.pow(between_angle,this.exponent));	// quadratic falloff of intensity
+			let specular_factor = Math.pow(cos_between_angle,this.exponent)
+			ls.intensity.multiplyScalar(specular_factor).multiplyScalar(1/ls.direction.lengthSq());	// quadratic falloff of intensity
 		}else{
 			ls.intensity = new THREE.Color(0,0,0); //return color black
 		}
+		
+		ls.direction.normalize();
+
 
 		return ls
 // ---YOUR CODE ENDS HERE---
