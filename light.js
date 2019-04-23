@@ -48,6 +48,21 @@ class SpotLight {
 	}
 	getLight(shadingPoint) {
 // ===YOUR CODE STARTS HERE===
+		let ls = new LightSample();
+	
+		//should still be the same as the pointlight
+		ls.position = this.position.clone();
+		ls.direction = this.position.clone();
+		ls.direction.sub(shadingPoint);
+		ls.direction.normalize();
+
+		// target - originate  ; results in a ray pointing from originate to target
+		let spotlight_vector = this.to.clone().sub(this.from)
+		let shadingPoint_vector = shadingPoint.clone().sub(this.from)
+		let between_angle = spotlight_vector.angleTo(shadingPoint_vector)
+		if (between_angle > (this.cutoff * Math.PI / 180)){ // if in the cutoff
+
+		}
 
 // ---YOUR CODE ENDS HERE---
 	}
