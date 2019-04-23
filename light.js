@@ -51,8 +51,8 @@ class SpotLight {
 		let ls = new LightSample();
 	
 		//should still be the same as the pointlight
-		ls.position = this.position.clone();
-		ls.direction = this.position.clone();
+		ls.position = this.from.clone();
+		ls.direction = ls.position.clone();
 		ls.direction.sub(shadingPoint);
 		ls.direction.normalize();
 
@@ -61,9 +61,13 @@ class SpotLight {
 		let shadingPoint_vector = shadingPoint.clone().sub(this.from)
 		let between_angle = spotlight_vector.angleTo(shadingPoint_vector)
 		if (between_angle > (this.cutoff * Math.PI / 180)){ // if in the cutoff
-
+			ls.intensity = this.intensity.clone();
+			ls.intensity.multiplyScalar(Math.pow(between_angle,this.exponent));	// quadratic falloff of intensity
+		}else{
+			ls.intensity = new THREE.Color(0,0,0); //return color black
 		}
 
+		return ls
 // ---YOUR CODE ENDS HERE---
 	}
 }
