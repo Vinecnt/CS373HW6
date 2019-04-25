@@ -90,9 +90,9 @@ class Sphere {
 			}
 			else if (t1>0 && t2>0){ // if both pos, take the min. however if the min fails, take the max
 				t = Math.min(t1,t2)
-				// if(t<tmin || t>tmax){
-				// 	t = Math.max(t1,t2)
-				// }
+				if(t<tmin || t>tmax){ // in the case both are pos; but t1 is realllly small
+					t = Math.max(t1,t2)
+				}
 			}
 			else{ // must mean both neg
 				return null
