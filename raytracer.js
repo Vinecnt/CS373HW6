@@ -82,7 +82,7 @@ function raytracing(ray, depth) {
 		}
 	}
 	else{
-		color = backgroundColor // if no intersection
+		return backgroundColor // if no intersection
 	}
 // ---YOUR CODE ENDS HERE---
 	return color;
@@ -99,13 +99,16 @@ function shading(ray, isect) {
 	for(let i=0; i<lights.length; i++){
 		let ls = lights[i].getLight(isect.position)
 		let shadowRay = new Ray(isect.position, ls.direction);
-		let distToLight = ls.position.clone().sub(isect.position).length()
+		let distToLight = (ls.position.clone().sub(isect.position)).length()
 		let shadow_isect = rayIntersectScene(shadowRay)
-		if (shadow_isect && ls.position.clone().sub(shadow_isect.position).length() <= distToLight){ // if there is a shadow intersection 
+		if (shadow_isect && shadow_isect.t < distToLight){ // if there is a shadow intersection 
 		// if (shadow_isect){ // if there is a shadow intersection 
 			//and the intersection length is shorter that the distance to the light. If the interesection length
 			// were further than the distance to the light, that means intersected something behidn the light
-			continue; // skip this iteration; we're done this loop iteration no need to do shading since shadowed
+			// let shadowRay_distance =  shadowRay.pointAt(shadow_isect.t).sub(shadowRay.origin).length()
+			// if(shadow_isect.t <= distToLight){
+				continue; // skip this iteration; we're done this loop iteration no need to do shading since shadowed	
+			// }
 		}
 		else{
 			let l = ls.direction
@@ -113,7 +116,7 @@ function shading(ray, isect) {
 			let v = (ray.direction()).negate()
 			let r = reflect(l,n)
 			//diffuse
-			if(isect.material.kd != null){
+			if(isect.material.kd){
 				let intensity_clone = ls.intensity.clone()
 				let diffuse = intensity_clone.multiply(isect.material.kd)
 				diffuse.multiplyScalar(Math.max(n.clone().dot(l), 0))
@@ -121,10 +124,10 @@ function shading(ray, isect) {
 			}
 
 			// if(isect.material.ks != null && isect.material.p != null){
-			if(isect.material.ks != null){
+			if(isect.material.ks){
 				let specular = ls.intensity.clone()
 				specular.multiply(isect.material.ks)
-				specular.multiplyScalar(Math.pow(Math.max(r.clone().dot(v), 0), isect.material.p))
+				specular.multiplyScalar(Math.max(r.clone().dot(v), 0) ** isect.material.p)
 				color.add(specular)
 			}
 		}
