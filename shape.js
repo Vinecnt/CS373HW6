@@ -74,9 +74,9 @@ class Sphere {
 		else if (discriminant >= 0){ // two isects, pick smallest pos
 			let t1 = (-1*B + Math.sqrt(discriminant) ) / (2*A)
 			let t2 = (-1*B - Math.sqrt(discriminant) ) / (2*A)
-			if ( t2 >= 0 && t2 <= tmax && t2 >= tmin){ // we know t2 is smaller check that first
+			if ( t2 <= tmax && t2 >= tmin){ // we know t2 is smaller check that first
 				t = t2
-			}else if (t1 >= 0 && t1 <= tmax && t1 >= tmin){ // if not t2 then check t1
+			}else if ( t1 <= tmax && t1 >= tmin){ // if not t2 then check t1
 				t = t1
 			}else{ // else both fail
 				return null
