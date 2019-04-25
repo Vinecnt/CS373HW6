@@ -68,14 +68,13 @@ function raytracing(ray, depth) {
 	if (isect != null){ 
 		// if there's reflectance and not max depth, recurse; sum of its transparency and reflectance
 		if ( (isect.material.kr != null || isect.material.kt != null) && (depth < maxDepth)){
-			color_1_clone = color.clone()
-			reflect_ray = ray.clone().reflect(isect.normal)
+			reflect_ray = new Ray(ray.origin(), ray.direction().clone().reflect(isect.normal))
 			reflected_color = raytracing(reflect_ray, depth+1)
 			if(isect.material.kr != null){
-				color = color.add( reflected_color.clone().multiply(isect.material.kr) )
+				color.add( reflected_color.clone().multiply(isect.material.kr) )
 			}
 			if(isect.material.kt != null){
-				color = color.add( reflected_color.clone().multiply(isect.material.kt))
+				color.add( reflected_color.clone().multiply(isect.material.kt))
 			}
 		}
 		else{
@@ -84,7 +83,7 @@ function raytracing(ray, depth) {
 	}
 	else{
 		color = backgroundColor // if no intersection
-		}
+	}
 // ---YOUR CODE ENDS HERE---
 	return color;
 }
@@ -102,7 +101,8 @@ function shading(ray, isect) {
 		let shadowRay = new Ray(isect.position, ls.direction);
 		let distToLight = ls.position.clone().sub(isect.position).length()
 		let shadow_isect = rayIntersectScene(shadowRay)
-		if (shadow_isect && ls.position.clone().sub(shadow_isect.position).length() < distToLight){ // if there is a shadow intersection 
+		if (shadow_isect && ls.position.clone().sub(shadow_isect.position).length() <= distToLight){ // if there is a shadow intersection 
+		// if (shadow_isect){ // if there is a shadow intersection 
 			//and the intersection length is shorter that the distance to the light. If the interesection length
 			// were further than the distance to the light, that means intersected something behidn the light
 			continue; // skip this iteration; we're done this loop iteration no need to do shading since shadowed
@@ -110,7 +110,7 @@ function shading(ray, isect) {
 		else{
 			let l = ls.direction
 			let n = isect.normal 
-			let v = (ray.d).multiplyScalar(-1)
+			let v = (ray.direction()).negate()
 			let r = reflect(l,n)
 			//diffuse
 			if(isect.material.kd != null){
@@ -120,7 +120,8 @@ function shading(ray, isect) {
 				color.add(diffuse)
 			}
 
-			if(isect.material.ks != null && isect.material.p != null){
+			// if(isect.material.ks != null && isect.material.p != null){
+			if(isect.material.ks != null){
 				let specular = ls.intensity.clone()
 				specular.multiply(isect.material.ks)
 				specular.multiplyScalar(Math.pow(Math.max(r.clone().dot(v), 0), isect.material.p))
@@ -130,6 +131,7 @@ function shading(ray, isect) {
 	}	
 // ---YOUR CODE ENDS HERE---
 	return color;
+	// return new THREE.Color(isect.normal.x,isect.normal.y,isect.normal.z) //return normals
 }
 
 /* Compute intersection of ray with scene shapes.
@@ -138,7 +140,7 @@ function rayIntersectScene(ray) {
 	let tmax = Number.MAX_VALUE;
 	let isect = null;
 	for(let i=0;i<shapes.length;i++) {
-		let hit = shapes[i].intersect(ray, 0.0001, tmax);
+		let hit = shapes[i].intersect(ray, 0.001, tmax);
 		if(hit != null) {
 			tmax = hit.t;
 			if(isect == null) isect = hit; // if this is the first time intersection is found

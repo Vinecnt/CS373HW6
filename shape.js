@@ -127,14 +127,76 @@ class Triangle {
 		// below you may pre-compute any variables that are needed for intersect function
 		// such as the triangle normal etc.
 // ===YOUR CODE STARTS HERE===
-
+		this.flat_normal = this.P1.clone().sub(this.P0).cross(
+								this.P2.clone().sub(this.P0)
+							).normalize()
 // ---YOUR CODE ENDS HERE---
 	} 
 
 	intersect(ray, tmin, tmax) {
 // ===YOUR CODE STARTS HERE===
+		let O = ray.origin()
+		let d = ray.direction()
+		let A = new THREE.Matrix3();
+		A.set(d.x, d.y, d.z,
+			this.P2.x - this.P0.x, this.P2.y - this.P0.y, this.P2.z - this.P0.z, 
+			this.P2.x - this.P1.x, this.P2.y - this.P1.y, this.P2.z - this.P1.z)
+		// let variable_mat = new Matrix3();
+		// let B = new THREE.Matrix3();
+		// B.set(this.P2.x - O.x, this.P2.y - O.y, this.P2.z - O.y)
+		//AX = B where X is the variables to solve
+		//solve for variables X using crammers rule
+		
+		let det_A = A.determinant()
+		// no interesections if det A == 0 since parallel
+		if (det_A == 0){ 
+			return null;
+		}
 
+		let temp = null
+		temp = new THREE.Matrix3()
+		temp.set(this.P2.x - O.x, this.P2.y - O.y, this.P2.z - O.y,
+			this.P2.x - this.P0.x, this.P2.y - this.P0.y, this.P2.z - this.P0.z, 
+			this.P2.x - this.P1.x, this.P2.y - this.P1.y, this.P2.z - this.P1.z)
+
+		let x_det = temp.determinant()
+		let t = x_det / det_A
+
+		temp.set(d.x, d.y, d.z,
+			this.P2.x - O.x, this.P2.y - O.y, this.P2.z - O.y, 
+			this.P2.x - this.P1.x, this.P2.y - this.P1.y, this.P2.z - this.P1.z)
+
+		let y_det = temp.determinant();
+		let alpha = y_det / det_A
+
+		temp.set(d.x, d.y, d.z,
+			this.P2.x - this.P0.x, this.P2.y - this.P0.y, this.P2.z - this.P0.z, 
+			this.P2.x - O.x, this.P2.y - O.y, this.P2.z - O.y,)
+
+		let z_det = temp.determinant()
+
+		let beta = z_det / det_A
 // ---YOUR CODE ENDS HERE---
+		if (alpha >= 0 && beta >= 0 && t >= 0 && alpha+beta <= 1 && t >= tmin && t <= tmax){
+			let isect = new Intersection();   // create intersection structure
+			isect.t = t;
+			isect.position = ray.pointAt(t);
+
+			if(this.n0 && this.n1 && this.n2){
+				//compute smooth normal
+				let a_n0 = this.n0.clone().multiplyScalar(alpha)
+				let b_n1 = this.n1.clone().multiplyScalar(beta)
+				let r_n2 = this.n2.clone().multiplyScalar(1-alpha-beta)
+
+				let temp_normal = a_n0.add(b_n1).add(r_n2).normalize()
+				isect.normal = temp_normal
+			}
+			else{
+				isect.normal = this.flat_normal
+			}
+			isect.material = this.material;
+			return isect;
+		}
 		return null;
 	}
 }
