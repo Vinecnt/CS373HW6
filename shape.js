@@ -71,42 +71,24 @@ class Sphere {
 		if (discriminant < 0){
 			return null
 		}
-		else if (discriminant == 0){ // one isect
-			if ( ( (-1*B) / (2*A)) > 0 ){ // if isect is pos, assign it to t
-				t = -1*B / 2*A
-			}
-			else{
-				return null
-			}
-		}
-		else if (discriminant > 0){ // two isects, pick smallest pos
+		else if (discriminant >= 0){ // two isects, pick smallest pos
 			let t1 = (-1*B + Math.sqrt(discriminant) ) / (2*A)
 			let t2 = (-1*B - Math.sqrt(discriminant) ) / (2*A)
-			if ( t1 >0 && t2 <0){ // if t1 is pos set t it t1
-				t = t1
-			}
-			else if (t1 <0 && t2 >0){ // if t2 is pos set t it t2
+			if ( t2 >= 0 && t2 <= tmax && t2 >= tmin){ // we know t2 is smaller check that first
 				t = t2
-			}
-			else if (t1>0 && t2>0){ // if both pos, take the min. however if the min fails, take the max
-				t = Math.min(t1,t2)
-				if(t<tmin || t>tmax){ // in the case both are pos; but t1 is realllly small
-					t = Math.max(t1,t2)
-				}
-			}
-			else{ // must mean both neg
+			}else if (t1 >= 0 && t1 <= tmax && t1 >= tmin){ // if not t2 then check t1
+				t = t1
+			}else{ // else both fail
 				return null
 			}
 		}
-
-		if(t<tmin || t>tmax) return null
-
 		let isect = new Intersection()	;   // create intersection structure
 		isect.t = t;
 		isect.position = ray.pointAt(t);
 		isect.normal = isect.position.clone().sub(this.C).normalize();
 		isect.material = this.material;
 		return isect;
+		
 // ---YOUR CODE ENDS HERE---
 			// return null;
 	}

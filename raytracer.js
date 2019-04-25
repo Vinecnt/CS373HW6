@@ -68,13 +68,14 @@ function raytracing(ray, depth) {
 	if (isect != null){ 
 		// if there's reflectance and not max depth, recurse; sum of its transparency and reflectance
 		if ( (isect.material.kr != null || isect.material.kt != null) && (depth < maxDepth)){
-			reflect_ray = new Ray(ray.origin(), ray.direction().clone().reflect(isect.normal))
-			reflected_color = raytracing(reflect_ray, depth+1)
+			reflect_ray = new Ray(ray.origin(), reflect(ray.direction().clone().negate(), isect.normal))
+			// reflect_ray = new Ray(ray.origin(), reflect(ray.direction(), isect.normal).negate())
+
 			if(isect.material.kr != null){
-				color.add( reflected_color.clone().multiply(isect.material.kr) )
+				color.add( raytracing(reflect_ray,depth+1 ).multiply(isect.material.kr) )
 			}
 			if(isect.material.kt != null){
-				color.add( reflected_color.clone().multiply(isect.material.kt))
+				color.add(raytracing(reflect_ray,depth+1 ).multiply(isect.material.kt))
 			}
 		}
 		else{
@@ -113,7 +114,7 @@ function shading(ray, isect) {
 		else{
 			let l = ls.direction
 			let n = isect.normal 
-			let v = (ray.direction()).negate()
+			let v = (ray.direction()).clone().negate()
 			let r = reflect(l,n)
 			//diffuse
 			if(isect.material.kd){
