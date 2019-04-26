@@ -1,0 +1,1 @@
+I've implemented ambient occlusion. There's a function called raytracingAO() which is run when parameter enableAO is true in the render function in raytracer. I've also included two scene files c.ball_pointlight_AO and d.ball_mirror_AO that run ambient occlusion
