@@ -1,1 +1,3 @@
 I've implemented ambient occlusion. There's a function called raytracingAO() which is run when parameter enableAO is true in the render function in raytracer. I've also included two scene files c.ball_pointlight_AO and d.ball_mirror_AO that run ambient occlusion
+
+I've also made my own scene in part e. I was trying to recreate one of those Mar's habitat designs that focuses on dome shaped room/areas. I also tried to make a fence link surrounding the compound. The reflection from the domes should show the hundreds of fence links encircling the habitat.

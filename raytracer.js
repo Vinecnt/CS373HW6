@@ -18,7 +18,7 @@ class Ray {
 	origin() { return this.o; }
 }
 
-function render(enableA0 = true) {
+function render(enableA0 = false) {
 	// create canvas of size imageWidth x imageHeight and add to DOM
 	let canvas = document.createElement('canvas');
 	canvas.width = imageWidth;
